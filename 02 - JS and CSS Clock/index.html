@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>JS + CSS Clock</title>
+    <link rel="icon" href="https://fav.farm/🕓" />
+  </head>
+  <body>
+    <div class="clock">
+      <div class="clock-face">
+        <div class="hand hour-hand"></div>
+        <div class="hand min-hand"></div>
+        <div class="hand second-hand"></div>
+      </div>
+    </div>
+
+    <style>
+      html {
+        background: url(./background.jpg) center;
+        background-size: cover;
+        font-family: "helvetica neue";
+        text-align: center;
+        font-size: 10px;
+      }
+
+      body {
+        margin: 0;
+        font-size: 2rem;
+        display: flex;
+        flex: 1;
+        min-height: 100vh;
+        align-items: center;
+      }
+
+      .clock {
+        width: 30rem;
+        height: 30rem;
+        border: 20px solid #c5c2b8;
+        border-radius: 50%;
+        margin: 50px auto;
+        position: relative;
+        padding: 2rem;
+        box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .clock-face {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transform: translateY(
+          -3px
+        ); /* account for the height of the clock hands */
+      }
+
+      .hand {
+        width: 50%;
+        height: 6px;
+        background: black;
+        position: absolute;
+        top: 50%;
+        border-radius: 7px;
+        transform-origin: 99%; /*改变旋转锚点*/
+        transform: rotate(90deg);
+        transition: all 0.05s;
+        transition-timing-function: cubic-bezier(0.1, 2.5, 0.5, 1);
+      }
+      .second-hand {
+        height: 3px;
+      }
+      .hour-hand {
+        height: 9px;
+      }
+    </style>
+
+    <script>
+      const secHand = document.querySelector(".second-hand");
+      const minHand = document.querySelector(".min-hand");
+      const hourHand = document.querySelector(".hour-hand");
+
+      const originalTransition = secHand.style.transition;
+
+      function setTime() {
+        const now = new Date();
+
+        const seconds = now.getSeconds();
+        const secDegrees = (seconds / 60) * 360 + 90; //加 90° 的原因是在 css 中设置了 transform: rotate(90deg); 之后设置都会带上 -90° 的偏移，因此需要加上 90°
+        if (secDegrees !== 90)
+          secHand.style.transform = `rotate(${secDegrees}deg)`;
+        else {
+          //从59秒到60秒（0秒）的过渡即是从444°到90°的过渡，而不是444°到450°的过渡，会在0.05秒的transition时间内跑完整个钟表一圈，因此需要在到达450°时取消transition，重置到90°，再恢复transition
+          secHand.style.transform = `rotate(450deg)`;
+          secHand.style.transition = "none";
+          secHand.style.transform = `rotate(90deg)`;
+          setTimeout(() => {
+            secHand.style.transition = originalTransition; // 恢复原始的transition属性值
+          }, 500);
+        }
+
+        const minutes = now.getMinutes();
+        const minDegrees = (minutes / 60) * 360 + 90;
+        if (minDegrees !== 90)
+          minHand.style.transform = `rotate(${minDegrees}deg)`;
+        else {
+          minHand.style.transform = `rotate(450deg)`;
+          minHand.style.transition = "none";
+          minHand.style.transform = `rotate(90deg)`;
+          setTimeout(() => {
+            minHand.style.transition = originalTransition; // 恢复原始的transition属性值
+          }, 500);
+        }
+
+        const hours = now.getHours();
+        const hourDegrees = (hours / 12) * 360 + 90;
+        if (hourDegrees !== 90)
+          hourHand.style.transform = `rotate(${hourDegrees}deg)`;
+        else {
+          hourHand.style.transform = `rotate(450deg)`;
+          hourHand.style.transition = "none";
+          hourHand.style.transform = `rotate(90deg)`;
+          setTimeout(() => {
+            hourHand.style.transition = originalTransition; // 恢复原始的transition属性值
+          }, 500);
+        }
+      }
+
+      setInterval(setTime, 1000);
+    </script>
+  </body>
+</html>
